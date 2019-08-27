@@ -1,6 +1,6 @@
 using Landis.Core;
 using Landis.Utilities;
-using Landis.Library.LeafBiomassCohorts;
+using Landis.Library.BiomassCohorts;
 using System.Text;
 using System;
 using System.Linq;
@@ -116,12 +116,17 @@ namespace Landis.Library.InitialCommunities
                             throw new InputValueException(age.Value.String,
                                                           "The age {0} is more than longevity ({1}).",
                                                           age.Value.String, species.Longevity);
-                        //TextReader.SkipWhitespace(currentLine);
+                        TextReader.SkipWhitespace(currentLine);
 
                         //Landis.Library.Succession.Model.Core.UI.WriteLine("New read in biomass value.");
-                        biomass = ReadBiomass(currentLine);
+                        //  Check for biomass values indicated by left parenthesis
+                        int nextChar = currentLine.Peek();
+                        if (nextChar == '(')
+                            biomass = ReadBiomass(currentLine);
+                        else
+                            biomass = 0;  // If biomass not provided, initialize as 0 (to be spun up later)
                         //ages.Add(age.Value.Actual);
-                        TextReader.SkipWhitespace(currentLine);
+                        //TextReader.SkipWhitespace(currentLine);
                         ageBio.Add(age.Value.Actual, biomass);
                     }
                     if (ageBio.Count == 0)
@@ -133,13 +138,14 @@ namespace Landis.Library.InitialCommunities
 
                     foreach (ushort age_key in ageBio.Keys)
                     {
-                        float initialWoodBiomass = ageBio[age_key];
-                        if (initialWoodBiomass <= 0.0)
+                        int initialWoodBiomass = Convert.ToInt32(ageBio[age_key]);
+                        //if (initialWoodBiomass <= 0.0)
+                        if (initialWoodBiomass < 0.0)
                             throw new InputValueException(speciesName.Value.String,
                                                           "Cohort {0}, age {1} has zero or negative biomass, line {2}",
                                                           species.Name, age_key, lineNumber);
 
-                        speciesCohortsList.Add(new SpeciesCohorts(species, age_key, initialWoodBiomass, (float)0.0));
+                        speciesCohortsList.Add(new SpeciesCohorts(species, age_key, initialWoodBiomass));
                     }
                     
                     GetNextLine();
