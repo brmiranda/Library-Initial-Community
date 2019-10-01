@@ -122,7 +122,10 @@ namespace Landis.Library.InitialCommunities
                         //  Check for biomass values indicated by left parenthesis
                         int nextChar = currentLine.Peek();
                         if (nextChar == '(')
+                        {
                             biomass = ReadBiomass(currentLine);
+                            TextReader.SkipWhitespace(currentLine);
+                        }
                         else
                             biomass = 0;  // If biomass not provided, initialize as 0 (to be spun up later)
                         //ages.Add(age.Value.Actual);
